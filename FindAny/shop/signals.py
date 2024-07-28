@@ -5,7 +5,8 @@ from django.db import models
 from icecream import ic
 
 @receiver(post_save, sender=ProductVariant)
-def update_product_quantity(sender, instance, created, **kwargs):
+def update_product_quantity(sender, 
+                            instance, created, **kwargs):
     product = instance.product
     total_variant_quantity = product.variants.aggregate(total=models.Sum('quantity'))['total'] or 0
     ic(total_variant_quantity)
