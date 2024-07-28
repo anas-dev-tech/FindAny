@@ -1,8 +1,8 @@
 from django.db import models
 from taggit.managers import TaggableManager
-
-
-
+from colorfield.fields import ColorField
+from django.core.exceptions import ValidationError
+from icecream import ic
 
 
 
@@ -32,6 +32,7 @@ class Product(models.Model):
     updated = models.DateTimeField(auto_now=True)
     tags = TaggableManager()
 
+
     class Meta:
         ordering = ('name',)
         index_together = (('id', 'slug'),)
@@ -43,6 +44,11 @@ class Product(models.Model):
         if self.discount_price:
             return self.discount_price
         return self.price
+    
+    def clean(self):
+        total_variant_quantity = self.variants.aggregate(total=models.Sum('quantity'))['total'] or 0
+        if total_variant_quantity != self.stock:
+            raise ValidationError('Total variant quantity must match product quantity')
 
 
 class ProductImage(models.Model):
@@ -51,3 +57,58 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return self.product.name
+
+class Color(models.Model):
+    COLOR_PALETTE = [
+        ("#FFFFFF", "white", ),
+        ("#000000", "black", ),
+    ]
+
+    # not restrictive, allows the selection of another color from the spectrum.
+    color = ColorField(samples=COLOR_PALETTE)
+    name = models.CharField(max_length=50)
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['color'], name='unique_color'),
+            models.UniqueConstraint(fields=['name'], name='unique_name')
+        ]
+    
+    def __str__(self):
+        return self.name
+    
+    
+class Size(models.Model):
+    size = models.CharField(max_length=200, db_index=True)
+
+    def __str__(self):
+        return self.size
+
+
+
+class ProductVariant(models.Model):
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='variants'
+    )
+    
+    color = models.ForeignKey(
+        Color,
+        on_delete=models.CASCADE,
+        related_name='products_with_this_color'
+    )
+    
+    size = models.ForeignKey(
+        Size,
+        on_delete=models.CASCADE,
+        related_name='products_with_this_size'
+    )
+    
+    quantity = models.PositiveIntegerField(default=0)
+    
+    
+
+    
+    
+    
