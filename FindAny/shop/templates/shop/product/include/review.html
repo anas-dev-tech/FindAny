@@ -1,0 +1,28 @@
+<div id="reviews" class="tab-pane fade">
+    <div class="post-comments">
+        <ul class="media-list comments-list m-bot-50 clearlist">
+            {% for review in product_reviews %}
+                <li class="media">
+                    <a class="pull-left" href="#!">
+                        <img class="media-object comment-avatar" src="" alt="" width="50" height="50" />
+                    </a>
+                    
+                    <div class="media-body">
+                        <div class="comment-info">
+                            <h4 class="comment-author">
+                                <a href="#!">{{review.user.full_name}}</a>
+                                
+                            </h4>
+                            <time datetime="2013-04-06T13:53">July 02, 2015, at 11:34</time>
+                            <a class="comment-button" href="#!"><i class="tf-ion-chatbubbles"></i>Reply</a>
+                        </div>
+                        
+                        <p>
+                            {{review.content|truncatewords:100}}
+                        </p>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

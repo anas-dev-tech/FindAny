@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     'home',
     'shop',
     'user',
-    
+    'review',    
     
     # third-party
     'taggit',

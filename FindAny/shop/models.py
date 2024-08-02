@@ -45,12 +45,34 @@ class Product(models.Model):
             return self.discount_price
         return self.price
     
+
+    def get_product_sizes(self):
+        colors = set()
+        for variant in self.variants.all():
+            if variant.is_in_stock():
+                colors.add(variant.size.size)
+            
+        return colors
+    
+    def get_product_colors(self):
+        sizes = set()
+        for variant in self.variants.all():
+            if variant.is_in_stock():
+                sizes.add(variant.color.color)
+                
+        return sizes
+    def get_product_reviews(self):
+        product_reviews = self.reviews.all()
+        return product_reviews
+    
+    
     def clean(self):
         total_variant_quantity = self.variants.aggregate(total=models.Sum('quantity'))['total'] or 0
         if total_variant_quantity != self.stock:
             raise ValidationError('Total variant quantity must match product quantity')
-
-
+    
+    
+    
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='products/%Y/%m/%d')
@@ -108,7 +130,13 @@ class ProductVariant(models.Model):
     quantity = models.PositiveIntegerField(default=0)
     
     
-
+    def __str__(self):
+        return f'{self.color}-{self.size}'
+    
+    def is_in_stock(self):
+        if self.quantity > 0:
+            return True
+        return False
     
     
     
